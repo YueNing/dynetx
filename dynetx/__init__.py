@@ -11,3 +11,6 @@ from dynetx.readwrite import *
 
 import dynetx.utils
 from dynetx.utils import *
+
+import dynetx.drawing
+from dynetx.drawing import *

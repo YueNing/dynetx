@@ -38,6 +38,6 @@ setup(name='dynetx',
           'Programming Language :: Python :: 3'
       ],
       keywords='dynamic-networks',
-      install_requires=['numpy', 'networkx', 'scipy', 'future', ''],
+      install_requires=['numpy', 'networkx', 'scipy', 'future', 'matplotlib', ''],
       packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test", "dynetx.test", "dynetx.test.*"]),
       )
