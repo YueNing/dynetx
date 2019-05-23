@@ -33,6 +33,7 @@ from networkx.utils import is_string_like
 from networkx.drawing.layout import shell_layout, \
     circular_layout, kamada_kawai_layout, spectral_layout, \
     spring_layout, random_layout, planar_layout
+from dynetx.drawing import glovar
 
 __all__ = ['draw',
            'draw_networkx',
@@ -110,6 +111,7 @@ def draw(G, pos=None, ax=None, **kwds):
     """
     try:
         import matplotlib.pyplot as plt
+        from matplotlib.animation import FuncAnimation
     except ImportError:
         raise ImportError("Matplotlib required for draw()")
     except RuntimeError:
@@ -131,16 +133,37 @@ def draw(G, pos=None, ax=None, **kwds):
         kwds['with_labels'] = 'labels' in kwds
         
     if pos is None:
-        pos = nx.drawing.spring_layout(G)  # default to spring layout
-    print(pos)
+        glovar.pos = nx.drawing.spring_layout(G)  # default to spring layout
+    else:
+        glovar.pos = pos
     try:
-        draw_networkx(G, pos=pos, ax=ax, **kwds)
+        glovar.G = G
+        _draw_networkx(glovar.G, glovar.pos)
+        ai = FuncAnimation(cf,_draw_edges, frames=_frame_analyse, interval=1000)
         ax.set_axis_off()
-        plt.draw_if_interactive()
+        plt.show()
     except:
         raise
     return
 
+def _draw_networkx(G, pos, with_labels=True,  **kwds):
+    node_collection = draw_networkx_nodes(glovar.G, glovar.pos, **kwds)
+    if with_labels:
+        draw_networkx_labels(G, pos, **kwds)
+
+def _draw_edges(frame, ax=None, with_labels=True, **kwds):
+    edge_collection = draw_networkx_edges(frame[0], frame[1], arrows=frame[2], **kwds)
+
+def _frame_analyse():
+    n = 0
+    while n < len(glovar.G.time_to_edge):
+        show_G = type(glovar.G).__base__()
+        nodes = []
+        for interaction in  glovar.G.time_to_edge[n]:
+            nodes.append((interaction[0], interaction[1]))
+        show_G.add_edges_from(nodes)
+        yield [show_G, glovar.pos, True]
+        n +=1
 
 def draw_networkx(G, pos=None, arrows=True, with_labels=True, **kwds):
     """Draw the graph G using Matplotlib.
@@ -286,27 +309,6 @@ def draw_networkx(G, pos=None, arrows=True, with_labels=True, **kwds):
         pos = nx.drawing.spring_layout(G)  # default to spring layout
 
     node_collection = draw_networkx_nodes(G, pos, **kwds)
-#     try:
-#         import numpy as np
-#         import matplotlib.pyplot as plt
-#         from matplotlib.animation import FuncAnimation
-        
-#         def init():
-#             return plt.gca()
-#         def draw_networkdyx(frame):
-#             node_collection = draw_networkx_nodes(frame, pos, **kwds)
-#             return node_collection,
-        
-#         ani = FuncAnimation(fig, draw_networkdyx, frames=G.time_to_edge,
-#                     init_func=, blit=True)
-#     except:
-#         raise
-#     for key, values in G.time_to_edge.items():
-#         print(values)
-#         show_G = nx.DiGraph()
-#         for value in values:
-#             show_G.add_edge(value[0], value[1])
-#             edge_collection = draw_networkx_edges(show_G, pos, arrows=arrows, **kwds)
     edge_collection = draw_networkx_edges(G, pos, arrows=arrows, **kwds)
     if with_labels:
         draw_networkx_labels(G, pos, **kwds)
