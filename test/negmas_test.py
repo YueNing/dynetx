@@ -50,13 +50,12 @@ def run_negmas():
 # TODO test for anac2019 tournament
 if __name__ == "__main__":
     fig, ax = plt.subplots(1,1) 
-    a = ShowProcess(ax=ax, fig=fig, world_recall_reuslt=glovar.world_recall_reuslt_naodongbanana)
+    a = ShowProcess(ax=ax, fig=fig,world_recall_reuslt_dict=glovar.world_recall_reuslt_naodongbanana_manager_dict)
     Event_Porcess_New_Step = "Porcess_New_Step"
-    listener1 = ListenerTypeOne('naodongbanana', glovar.world_recall_reuslt_naodongbanana)
-    listener2 = ListenerTypeOne('schorsch', glovar.world_recall_reuslt_schorsch)
+    listener1 = ListenerTypeOne('naodongbanana',
+                                world_recall_reuslt_dict=glovar.world_recall_reuslt_naodongbanana_manager_dict)
     ee = EventEngine()
     ee.register(Event_Porcess_New_Step, listener1.showNewStep)
-    ee.register(Event_Porcess_New_Step, listener2.showNewStep)
     ee.start()
     publicAcc = Public_NegmasAccount(ee)
     negmas = Process(target=run_negmas)

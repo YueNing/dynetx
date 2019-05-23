@@ -4,10 +4,14 @@
 __author__ = 'naodongbanana'
 
 from multiprocessing import Process, Queue
+from negmas.apps.scml import SCMLWorld
 import time
 import glovar
 
 class EventEngine(object):
+    """
+        Base class used to manager a public class
+    """
     def __init__(self, *args, **kwargs):
         self._eventQueue = Queue()
         self._active = False
@@ -75,35 +79,58 @@ class EventEngine(object):
         self._eventQueue.put(event)
 
 class Event(object):
-
+    """
+        Event Class
+    """
     def __init__(self, type=None, *args, **kwargs):
         self.type = type
         self.dict = {}
 
 class Public_NegmasAccount:
-    
+    """"
+        Public class analyse world information and decide which information needed to send to listener ,
+        need to use a eventengine to manager the event
+        example:
+            Event_Porcess_New_Step = "Porcess_New_Step"
+            listener1 = ListenerTypeOne('naodongbanana',
+                                        world_recall_reuslt_dict=glovar.world_recall_reuslt_naodongbanana_manager_dict)
+            ee = EventEngine()
+            ee.register(Event_Porcess_New_Step, listener1.showNewStep)
+            ee.start()
+            publicAcc = Public_NegmasAccount(ee)
+            publicAcc.processNewStep(Event_Porcess_New_Step, world)
+    """
     def __init__(self, eventManager):
         self._eventManager = eventManager
         self.scmlWorld = None
 
-    def processNewStep(self, eventType, world=None):
+    def processNewStep(self, eventType, world:SCMLWorld=None):
         event = Event(eventType)
-        if world:
+        if world is not None:
+            event.dict = self._process_world(world)
             event.dict['current_step'] = world.current_step
+            event.dict['scmlworld'] = world.name
         else:
-            event.dict['current_step'] = 10000
+            event.dict['current_step'] = -1
+            event.dict['scmlworld'] = None
         self._eventManager.sendEvent(event)
-        print('negmas process new step')
+        print('send inforamtion about new step ')
+
+    @staticmethod
+    def _process_world(world):
+        event_dict = {}
+        return event_dict
 
 class ListenerTypeOne:
-    def __init__(self, username, world_recall_reuslt):
+    def __init__(self, username, world_recall_reuslt_dict=None):
         self._username = username
-        self._world_recall_reuslt = world_recall_reuslt
+        self._world_recall_reuslt_dict = world_recall_reuslt_dict
 
     def showNewStep(self, event):
-        print('{} get the result of new step'.format(self._username))
-        # print('plot the result of new step {}'.format(event.dict['current_step']))
-        glovar.world_recall = event.dict['current_step']
-        if self._world_recall_reuslt:
-            self._world_recall_reuslt.value = glovar.world_recall
-            print('plot the result of new step {}'.format(self._world_recall_reuslt.value))
+        print('{} get the result of new step and manager {}'.format(self._username, self._world_recall_reuslt_dict))
+        glovar.step = event.dict['current_step']
+        glovar.scmlworld = event.dict['scmlworld']
+        if self._world_recall_reuslt_dict is not None:
+            self._world_recall_reuslt_dict['current_step'] = glovar.step
+            self._world_recall_reuslt_dict['scmlworld'] = glovar.scmlworld
+            print('plot the result of new step {}'.format(self._world_recall_reuslt_dict['current_step']))
