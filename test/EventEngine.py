@@ -107,19 +107,17 @@ class Public_NegmasAccount:
     def processNewStep(self, eventType, world:SCMLWorld=None):
         event = Event(eventType)
         if world is not None:
-            event.dict = self._process_world(world)
-            event.dict['current_step'] = world.current_step
-            event.dict['scmlworld'] = world.name
+            event.dict = {'current_step':world.current_step if world.current_step is not None else 0, 
+                                            'scmlworld':world.name if world.name else None,
+                                            'factories managers': [manager.name for manager in world.factory_managers], 
+                                            'consumers':[consumer.name for consumer in world.consumers],
+                                            'miners':[miner.name for miner in world.miners]
+                                        }
         else:
             event.dict['current_step'] = -1
             event.dict['scmlworld'] = None
         self._eventManager.sendEvent(event)
         print('send inforamtion about new step ')
-
-    @staticmethod
-    def _process_world(world):
-        event_dict = {}
-        return event_dict
 
 class ListenerTypeOne:
     def __init__(self, username, world_recall_reuslt_dict=None):
@@ -131,6 +129,6 @@ class ListenerTypeOne:
         glovar.step = event.dict['current_step']
         glovar.scmlworld = event.dict['scmlworld']
         if self._world_recall_reuslt_dict is not None:
-            self._world_recall_reuslt_dict['current_step'] = glovar.step
-            self._world_recall_reuslt_dict['scmlworld'] = glovar.scmlworld
+            for k, value in event.dict.items():
+                self._world_recall_reuslt_dict[k] = value 
             print('plot the result of new step {}'.format(self._world_recall_reuslt_dict['current_step']))
