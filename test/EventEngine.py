@@ -109,7 +109,7 @@ class Public_NegmasAccount:
         if world is not None:
             event.dict = {'current_step':world.current_step if world.current_step is not None else 0, 
                                             'scmlworld':world.name if world.name else None,
-                                            'factories managers': [manager.name for manager in world.factory_managers], 
+                                            'factories_managers': [manager.name for manager in world.factory_managers], 
                                             'consumers':[consumer.name for consumer in world.consumers],
                                             'miners':[miner.name for miner in world.miners]
                                         }

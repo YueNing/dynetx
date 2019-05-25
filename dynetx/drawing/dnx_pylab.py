@@ -137,11 +137,16 @@ def draw(G, pos=None, ax=None, **kwds):
     else:
         glovar.pos = pos
     try:
-        glovar.G = G
-        _draw_networkx(glovar.G, glovar.pos)
-        ai = FuncAnimation(cf,_draw_edges, frames=_frame_analyse, interval=1000)
-        ax.set_axis_off()
-        plt.show()
+        if G.time_to_edge:
+            glovar.G = G
+            _draw_networkx(glovar.G, glovar.pos)
+            ai = FuncAnimation(cf,_draw_edges, frames=_frame_analyse, interval=1000)
+            ax.set_axis_off()
+            plt.draw_if_interactive()
+        else:
+            draw_networkx(G, pos=glovar.pos, ax=ax, **kwds)
+            ax.set_axis_off()
+            plt.draw_if_interactive()
     except:
         raise
     return
