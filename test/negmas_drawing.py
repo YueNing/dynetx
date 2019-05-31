@@ -4,6 +4,7 @@ sys.path.append('../')
 import dynetx as dnx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from negmas_draw import *
 
 class ShowProcess:
     def __init__(self, ax=None, fig=None, world_recall_reuslt_dict=None, *args, **kwargs):
@@ -35,10 +36,15 @@ class ShowProcess:
         self.g.add_nodes_from(factories_managers)
         self.g.add_nodes_from(consumers)
         self.g.add_nodes_from(miners)
-        self.pos =dnx.spring_layout(self.g,k=30,iterations=8)
-
-        dnx.draw_networkx_nodes(self.g, pos=self.pos, with_labels=True)
-        dnx.draw_networkx_labels(self.g,pos=self.pos,font_size=10)
+        # self.pos =dnx.spring_layout(self.g,k=30,iterations=8)
+        node_name = [miners, factories_managers, consumers]
+        layer_sizes = [len(layer) for layer in node_name]
+        self.g = negmas_add_nodes(self.g, layer_sizes, node_name)
+        # self.g = negmas_add_edges(G, layer_sizes, node_name=node_name, contracts=contracts)
+        self.pos = negmas_layout(G, layer_sizes)
+        negmas_draw(G, negmas_edge_colors, node_colors=negmas_node_colors, pos=pos)
+        # dnx.draw_networkx_nodes(self.g, pos=self.pos, with_labels=True)
+        # dnx.draw_networkx_labels(self.g,pos=self.pos,font_size=10)
 
 
     def update(self,frame):

@@ -9,7 +9,7 @@ import datetime
 from negmas.utilities import LinearUtilityAggregationFunction
 from EventEngine import Public_NegmasAccount, ListenerTypeOne, EventEngine
 import glovar
-from test_drawing import *
+from negmas_drawing import *
 from multiprocessing import Process
 
 def tournament_progress_callback(results:WorldRunResults):

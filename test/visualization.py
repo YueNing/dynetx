@@ -1,7 +1,7 @@
 import glovar
 import multiprocessing
 import time
-from test_drawing import *
+from negmas_drawing import *
 import psutil
 
 class RecallClockProcess(multiprocessing.Process):
