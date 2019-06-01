@@ -2,10 +2,12 @@ import glovar
 import sys
 sys.path.append('../')
 import dynetx as dnx
+import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 # from threading import Event
 import itertools
+import negmas_draw
 class ShowProcess:
     def __init__(self, ax=None, fig=None, world_recall_reuslt_dict=None, *args, **kwargs):
         self.ax = ax
@@ -43,24 +45,19 @@ class ShowProcess:
         factories_managers = self._world_recall_reuslt_dict['factories_managers']
         consumers = self._world_recall_reuslt_dict['consumers']
         miners = self._world_recall_reuslt_dict['miners']
-        self.g = dnx.DynDiGraph(edge_removal=True)
-        self.g.add_nodes_from(factories_managers)
-        self.g.add_nodes_from(consumers)
-        self.g.add_nodes_from(miners)
-        self.pos =dnx.spring_layout(self.g,k=30,iterations=8)
 
-        dnx.draw_networkx_nodes(self.g, pos=self.pos, with_labels=True)
-        dnx.draw_networkx_labels(self.g,pos=self.pos,font_size=10)
+        node_name = [miners, factories_managers, consumers]
+        layer_sizes = [len(layer) for layer in node_name]
+        self.g = nx.DiGraph()
+        self.g = negmas_draw.negmas_add_nodes(self.g, layer_sizes, node_name)
+        self.pos = negmas_draw.negmas_layout(self.g, layer_sizes)
+        negmas_draw.negmas_draw(self.g, negmas_draw.negmas_edge_colors, node_colors=negmas_draw.negmas_node_colors, pos=self.pos)
 
 
     def update(self,frame):
         print('frame:' ,frame)
-        interactions = itertools.combinations(self._world_recall_reuslt_dict['factories_managers'], 2)
-        print(interactions)
-        self.g.add_interactions_from(interactions, t=frame[0])
-        # scat = self.ax.scatter(frame[0], frame[0])
-        # self._world_recall_reuslt_dict['factories_managers']:
-        #     self.g.add_interaction(u=frame[2][1], v=frame[3][1], t=frame[0])
+        interactions = itertools.product(self._world_recall_reuslt_dict['miners'], self._world_recall_reuslt_dict['factories_managers'])
+        self.g.add_edges_from(interactions)
         dnx.draw_networkx_edges(self.g, pos=self.pos, arrows=True)
         print('update a step')
         # return scat,
