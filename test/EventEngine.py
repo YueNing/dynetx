@@ -125,10 +125,10 @@ class ListenerTypeOne:
         self._world_recall_reuslt_dict = world_recall_reuslt_dict
 
     def showNewStep(self, event):
-        print('{} get the result of new step and manager {}'.format(self._username, self._world_recall_reuslt_dict))
         glovar.step = event.dict['current_step']
         glovar.scmlworld = event.dict['scmlworld']
         if self._world_recall_reuslt_dict is not None:
             for k, value in event.dict.items():
                 self._world_recall_reuslt_dict[k] = value 
-            print('plot the result of new step {}'.format(self._world_recall_reuslt_dict['current_step']))
+        print('{} get the result of new step and manager {}'.format(self._username, self._world_recall_reuslt_dict))        
+        # print('plot the result of new step {}'.format(self._world_recall_reuslt_dict['current_step']))
