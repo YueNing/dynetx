@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from negmas.apps.scml import SCMLWorld
 import time
 import glovar
-
+import itertools
 class EventEngine(object):
     """
         Base class used to manager a public class
@@ -104,15 +104,28 @@ class Public_NegmasAccount:
         self._eventManager = eventManager
         self.scmlWorld = None
 
+    def _process_world(self, world):
+        miners = [miner.name for miner in world.miners]
+        factories_managers = [manager.name for manager in world.factory_managers]
+        consumers = [consumer.name for consumer in world.consumers]
+
+        def _contracts():
+            return [(_contract['seller_name'], _contract['buyer_name']) for _contract in world.signed_contracts]
+        
+        contracts = _contracts()
+        public_dic =  {'current_step':world.current_step if world.current_step is not None else 0, 
+                                            'scmlworld':world.name if world.name else None,
+                                            'factories_managers': factories_managers, 
+                                            'consumers':consumers,
+                                            'miners': miners,
+                                            'contracts':contracts
+                                        }
+        return public_dic
+
     def processNewStep(self, eventType, world:SCMLWorld=None):
         event = Event(eventType)
         if world is not None:
-            event.dict = {'current_step':world.current_step if world.current_step is not None else 0, 
-                                            'scmlworld':world.name if world.name else None,
-                                            'factories_managers': [manager.name for manager in world.factory_managers], 
-                                            'consumers':[consumer.name for consumer in world.consumers],
-                                            'miners':[miner.name for miner in world.miners]
-                                        }
+            event.dict = self._process_world(world)
         else:
             event.dict['current_step'] = -1
             event.dict['scmlworld'] = None
@@ -130,5 +143,5 @@ class ListenerTypeOne:
         if self._world_recall_reuslt_dict is not None:
             for k, value in event.dict.items():
                 self._world_recall_reuslt_dict[k] = value 
-        print('{} get the result of new step and manager {}'.format(self._username, self._world_recall_reuslt_dict))        
+        # print('{} get the result of new step and manager {}'.format(self._username, self._world_recall_reuslt_dict))        
         # print('plot the result of new step {}'.format(self._world_recall_reuslt_dict['current_step']))

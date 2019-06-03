@@ -30,7 +30,7 @@ def run_negmas():
                         , agent_names_reveal_type=True,n_configs=1,
                         n_agents_per_competitor=10
                         , max_worlds_per_config=1        # we are allowing only 10 worlds to run
-                        ,n_runs_per_world=10
+                        ,n_runs_per_world=1
                         , n_steps=100              # we are running each world for 20 steps only
                         , negotiator_type =  'negmas.sao.AspirationNegotiator'
                         # ,name= 'test_tournament2'

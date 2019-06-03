@@ -76,7 +76,7 @@ def negmas_node_colors(G):
     return node_colors
 
 def negmas_edge_colors(G):
-    return ['gray' for i in range(len(G.edges))]
+    return ['black' for i in range(len(G.edges))]
 
 def negmas_draw(G, edge_colors, node_colors=None, pos=None):
     if pos is not None:
@@ -84,7 +84,10 @@ def negmas_draw(G, edge_colors, node_colors=None, pos=None):
     else:
         pos = nx.get_node_attributes(G, 'pos')
     if node_colors is not None:
-        node_color = node_colors(G)
+        if callable(node_colors):
+            node_color = node_colors(G)
+        if isinstance(node_colors, list):
+            node_color = node_colors
     else:
         node_color = []
         colors = nx.get_node_attributes(G, 'color')
@@ -96,7 +99,7 @@ def negmas_draw(G, edge_colors, node_colors=None, pos=None):
         with_labels=True,
         node_size=200, 
         edge_color=edge_colors(G), 
-        width=3, 
+        width=1, 
         cmap=plt.cm.Dark2,
         edge_cmap=plt.cm.Blues
        )
