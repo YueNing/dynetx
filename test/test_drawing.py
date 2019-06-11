@@ -102,7 +102,8 @@ class ShowProcess:
         # return scat,
 
     def show(self):
-        ai = FuncAnimation(self.fig, self.update, frames=self.iterf, interval=500, init_func=self.init)
+        ai = FuncAnimation(self.fig, self.update, frames=self.iterf, interval=100, init_func=self.init)
+        plt.get_current_fig_manager().full_screen_toggle()
         plt.show(block = True)
 
 
@@ -162,13 +163,15 @@ if __name__ == "__main__":
     G = nx.DiGraph()
     G.add_node('test1' , color='red')
     nx.draw(G, node_color=G.nodes['test1']['color'])
+    time.sleep(3)
     plt.draw_if_interactive()
-    time.sleep(1)
+    
     color = G.nodes['test1']['color']
     G.nodes['test1']['color'] = 'blue'
     nx.draw(G, node_color=G.nodes['test1']['color'])
     plt.draw_if_interactive()
-    time.sleep(1)
+    # time.sleep(1)
     # G.nodes['test1']['color'] = color
     # nx.draw(G, node_color=G.nodes['test1']['color'])
     plt.show()
+    

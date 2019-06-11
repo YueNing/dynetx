@@ -4,28 +4,32 @@ import numpy as np
 
 def negmas_layout(G, layer_sizes):
     import numpy as np
-    left, right, bottom, top, layer_sizes = .1, .9, .1, .9, layer_sizes
+    left, right, bottom, top, layer_sizes = .1, .9, .3, .9, layer_sizes
     v_spacing = (top - bottom)/float(max(layer_sizes))
     h_spacing = (right - left)/float(len(layer_sizes) - 1)
     node_count = 0
-    A = nx.to_numpy_array(G)
+    if not isinstance(G, list):
+        A = nx.to_numpy_array(G)
     pos = []
     for i, v in enumerate(layer_sizes):
         layer_top = v_spacing*(v-1)/2. + (top + bottom)/2.
         for j in range(v):
             pos.append(np.array([left + i*h_spacing, layer_top - j*v_spacing], dtype='float64'))
             node_count += 1
-    for node in G.nodes:
-        if 'pos' in G.nodes[node]:
-            pos = []
-            poss = nx.get_node_attributes(G, 'pos')
-            for node in G.nodes:
-                pos.append(poss[node])
-            break
-        else:
-            break
-    pos = dict(zip(G, pos))
-    return pos
+    if isinstance(G, list):
+        return pos
+    else:
+        for node in G.nodes:
+            if 'pos' in G.nodes[node]:
+                pos = []
+                poss = nx.get_node_attributes(G, 'pos')
+                for node in G.nodes:
+                    pos.append(poss[node])
+                break
+            else:
+                break
+        pos = dict(zip(G, pos))
+        return pos
 
 def negmas_add_nodes(G, layer_sizes, node_name=None):
     import numpy as np
@@ -78,7 +82,7 @@ def negmas_node_colors(G):
 def negmas_edge_colors(G):
     return ['black' for i in range(len(G.edges))]
 
-def negmas_draw(G, edge_colors, node_colors=None, pos=None):
+def negmas_draw(G, edge_colors, node_colors=None, pos=None, ax=None, **kwargs):
     if pos is not None:
         pos = pos
     else:
@@ -94,7 +98,7 @@ def negmas_draw(G, edge_colors, node_colors=None, pos=None):
         for node in G.nodes:
             node_color.append(colors[node])
     
-    nx.draw(G, pos, 
+    nx.draw(G, pos, ax=ax,
         node_color= node_color, 
         with_labels=True,
         node_size=200, 
