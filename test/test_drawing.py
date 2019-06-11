@@ -11,12 +11,20 @@ import itertools
 import negmas_draw
 import time
 class ShowProcess:
-    def __init__(self, ax=None, fig=None, world_recall_reuslt_dict=None, *args, **kwargs):
+    """
+    ax, fig: Union[,None], when use matplotlib this parameter are needed
+    draw_backend: Union['matplotlib', 'pyecharts']
+    mode: Union['online_memory', 'online_file', 'offline'], diffenet mode the process are different
+    """
+    def __init__(self, ax=None, fig=None, world_recall_reuslt_dict=None, 
+                    draw_backend='matplotlib', mode='online_memory', *args, **kwargs):
         self.ax = ax
         self.fig = fig
         self.world_recall = 0
         self.iterf = self.iter_frame()
         self._world_recall_reuslt_dict = world_recall_reuslt_dict
+        self.draw_backend = draw_backend
+        self.mode = mode
         if 'scmlworld' not in self._world_recall_reuslt_dict:
             self._world_recall_reuslt_dict['scmlworld'] = 'None'
         if 'current_step' not in self._world_recall_reuslt_dict:
@@ -80,10 +88,13 @@ class ShowProcess:
         self.g = nx.DiGraph()
         self.g = negmas_draw.negmas_add_nodes(self.g, layer_sizes, node_name)
         self.pos = negmas_draw.negmas_layout(self.g, layer_sizes)
-        plt.title('world:{}'.format(scmlworld), fontsize='large', fontweight='bold')
-        self.text_step = plt.text(0.48, 0, 'step: 0',fontsize=20)
-        self.text_contracts = plt.text(0, 0, 'contracts singed information')
-        negmas_draw.negmas_draw(self.g, negmas_draw.negmas_edge_colors, node_colors=negmas_draw.negmas_node_colors, pos=self.pos)
+        if self.draw_backend == 'matplotlib':
+            plt.title('world:{}'.format(scmlworld), fontsize='large', fontweight='bold')
+            self.text_step = plt.text(0.48, 0, 'step: 0',fontsize=20)
+            self.text_contracts = plt.text(0, 0, 'contracts singed information')
+            negmas_draw.negmas_draw(self.g, negmas_draw.negmas_edge_colors, node_colors=negmas_draw.negmas_node_colors, pos=self.pos)
+        elif self.draw_backend == 'pyecharts':
+            pass
 
 
     def update(self,frame):

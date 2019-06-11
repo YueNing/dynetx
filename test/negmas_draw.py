@@ -33,7 +33,7 @@ def negmas_layout(G, layer_sizes):
 
 def negmas_add_nodes(G, layer_sizes, node_name=None):
     import numpy as np
-    left, right, bottom, top, layer_sizes = .1, .9, .1, .9, layer_sizes
+    left, right, bottom, top, layer_sizes = .1, .9, .27, .73, layer_sizes
     v_spacing = (top - bottom)/float(max(layer_sizes))
     h_spacing = (right - left)/float(len(layer_sizes) - 1)
     node_count = 0
@@ -63,9 +63,16 @@ def negmas_add_edges(G, layer_sizes, node_name=None, contracts=None):
                     G.add_edge(i+sum(layer_sizes[:x]), j+sum(layer_sizes[:x+1]))    
     return G
 
-def negmas_node_colors(G):
+def negmas_node_colors(G, layer_sizes=None, dic_mode=False):
     color = 0
     node_colors = []
+    if locals['layer_sizes'] is None:
+        try:
+            if globals['layer_sizes'] is not None:
+                locals['layer_sizes'] = globals['layer_sizes']
+        except:
+            print('layer_sizes is not defined')
+    
     for node in G.nodes:
         if 'color' in G.nodes[node]:
             for node in G.nodes:
@@ -77,7 +84,10 @@ def negmas_node_colors(G):
                     node_colors.append(color)
                 color +=1
             break
-    return node_colors
+    if dic_mode:
+        return dict(zip(G, node_colors))
+    else:
+        return node_colors
 
 def negmas_edge_colors(G):
     return ['black' for i in range(len(G.edges))]
