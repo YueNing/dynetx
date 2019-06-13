@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: Negmas Visualization Draw API
+  version: '0.1'
+  description: An example API for Draw
+servers:
+  - url: https://www.github.com/yuening
+paths:
+  /draw:
+    get:
+      summary: List all the Draw api.
+      operationId: listDraw
+      parameters:
+      - in: query
+        name: search
+        description: Filter draw by this search term.
+        schema:
+          type: string
