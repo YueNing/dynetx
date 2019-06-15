@@ -12,7 +12,8 @@ from test import grid_horizontal
 from flask.json import jsonify
 from flask import Flask, render_template
 from app import FlaskAppWrapper
-from networkx import DiGraph 
+from networkx import DiGraph
+from backend.api import draw
 import sys
 sys.path.append('../')
 import negmas_draw
@@ -32,7 +33,6 @@ mode = 'debug'
 class Setup_Graph:
     name: str
     linestyleopts: Union[Sequence[Union[opts.LineStyleOpts, dict]], None]
-    categories: Union[Sequence[Union[opts.GraphCategory, dict]], None]
     graph: Union[DiGraph, dict]
     layer_sizes: list
     node_name: list
@@ -52,36 +52,40 @@ class DrawPyechart(object):
             g = negmas_draw.negmas_add_nodes(g, self.layer_sizes, self.node_name)
             self.g = g
         self._init()
-        self.config = Setup_Graph(name, self.linestyleopts, self.categories, self.g, self.layer_sizes, self.node_name)
+        self.config = Setup_Graph(name, self.linestyleopts, self.g, self.layer_sizes, self.node_name)
+        
         self.a = FlaskAppWrapper(name, static_folder=static_folder)
-        self.a.add_endpoint(rule='/', endpoint='home', view_func=self.index)
-        self.a.add_endpoint(rule='/GraphChart', endpoint='GraphChart', view_func=self._graph_with_opts)
-        self.a.add_endpoint(rule='/Liquid', endpoint='Liquid', view_func=self._get_liquid_chart)
-        self.a.add_endpoint(rule='/GraphDynamicData', endpoint='GraphDynamicData', view_func=self._graph_with_opts_dyn)
-        self.a.add_endpoint(rule='/Bar3dData', endpoint='Bar3dData', view_func=self._bar3d_with_opts)
-        self.a.add_endpoint(rule='/Grid', endpoint='Grid', view_func=self._test_grid)
+        self._endpoints()
         self.a.run()
     
     def _init(self):
         self.linestyleopts = [
             opts.LineStyleOpts(width=5),
         ]
-        try:
-            categories ={self.g.nodes[node]['color'] for node in self.g.nodes}
-            self.categories = [opts.GraphCategory(name='level_'+str(category)) for category in categories]
-        except:
-            self.categories = [
-                opts.GraphCategory(name='c1'),
-                opts.GraphCategory(name='c2'),
-                opts.GraphCategory(name='c3'),
-                opts.GraphCategory(name='c4'),
-                opts.GraphCategory(name='c5'),
-            ]
-            print('default categories')
 
+
+    def _endpoints(self):
+        self.a.add_endpoint(rule='/', endpoint='home', view_func=self.index)
+        self.a.add_endpoint(rule='/my', endpoint='my', view_func=self.my_config)
+        self.a.add_endpoint(rule='/system', endpoint='system', view_func=self.system_config)
+        self.a.add_endpoint(rule='/real_time', endpoint='real_time', view_func=self.real_time)
+        self.a.add_endpoint(rule='/GraphChart', endpoint='GraphChart', view_func=self._graph_with_opts)
+        self.a.add_endpoint(rule='/Liquid', endpoint='Liquid', view_func=self._get_liquid_chart)
+        self.a.add_endpoint(rule='/GraphDynamicData', endpoint='GraphDynamicData', view_func=self._graph_with_opts_dyn)
+        self.a.add_endpoint(rule='/Bar3dData', endpoint='Bar3dData', view_func=self._bar3d_with_opts)
+        self.a.add_endpoint(rule='/Grid', endpoint='Grid', view_func=self._test_grid)
 
     def index(self):
         return render_template("index.html")
+
+    def real_time(self):
+        return render_template("_real_time.html")
+    
+    def my_config(self):
+        return render_template("_config_my.html")
+
+    def system_config(self):
+        return render_template("_config_system.html")
 
     @staticmethod
     def _get_liquid_chart():
@@ -91,18 +95,8 @@ class DrawPyechart(object):
         return [len(node) for node in self.node_name]
     
     def _graph_with_opts(self):
-        nodes = [opts.GraphNode(name=node, 
-                    x=self.config.graph.nodes[node]['pos'][0], 
-                    y=self.config.graph.nodes[node]['pos'][1], 
-                    symbol_size=10, category='level_'+str(self.config.graph.nodes[node]['color']))
-                    for node in self.config.graph.nodes]
-        links = []
-        c = (
-            Graph()
-            .add("", nodes, links, self.categories, edge_symbol=['', 'arrow'], edge_symbol_size=10,layout='none', repulsion=4000,
-            emphasis_itemstyle_opts=self.config.linestyleopts[0])
-            .set_global_opts(title_opts=opts.TitleOpts(title=""))
-        )
+        config = {'emphasis_linestyleopts': self.config.linestyleopts[0]}
+        c = draw.graph_contracted_signed(config, self.config.graph.nodes)
         return c.dump_options()
     
     @staticmethod
